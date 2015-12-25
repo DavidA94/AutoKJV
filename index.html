@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>KJV Bible Demo</title>
+<link rel="stylesheet" href="css/autoKJV.css" />
+<script type="text/javascript" src="js/autoKJV.js"></script>
+</head>
+
+<body>
+
+<pre>
+</pre>
+
+<div class="verses">
+<?php
+require(dirname(__FILE__) . "/php/kjv_parser.php");
+
+echo getBibleHTML("Genesis 1:9-10; Ps 117; John 1:1");
+?>
+</div>
+
+<script type="text/javascript">
+initAutoKJV();
+</script>
+
+</body>
+</html>

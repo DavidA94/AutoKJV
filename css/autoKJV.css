@@ -1,0 +1,11 @@
+.passageWrapper {float:left;}
+.passageWrapper .badRef {font-size:2em;color:red;}
+.passageWrapper .fullRef::after {content:";\00a0";}
+.passageWrapper:last-child .fullRef::after {content:none;}
+.passageWrapper .passage {position:absolute;display:none;background:#ffffde;border:1px solid #e6e6a9;padding:5px;max-width:500px;
+    min-width:100px;}
+.passageWrapper .passage .popupRef {font-size:1em;font-weight:bold;margin-bottom:7px;}
+.passageWrapper .verse {overflow:hidden;}
+.passageWrapper .verse .verseNum {float:left;clear:left;padding-right:5px;}
+.passageWrapper .verse .verseTxt {overflow:hidden;}
+.passageWrapper#openVerse .passage {position:absolute;display:block;}
