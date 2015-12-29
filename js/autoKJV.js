@@ -2,6 +2,11 @@
 var OPEN_VERSE = "openVerse";
 var PASSAGE_WRAPPER = "passageWrapper";
 
+// Used for detecting a screen orientation change
+var screenX = window.innerWidth;
+var screenY = window.innerHeight;
+var screenO = window.orientation;
+
 /********************************************************
 ** initAutoKJV function definition                      *
 ** Initializes a page that utilizes the AutoKJV module. *
@@ -21,6 +26,9 @@ function initAutoKJV(){
     
     // This even allows mobile users to close a passage by touching anywhere on the page
     document.documentElement.addEventListener('touchend', body_touchend);
+    
+    // This redoes any open verses when the screen is rotated
+    window.addEventListener('resize', window_resize);
 }
 
 /********************************************
@@ -31,39 +39,18 @@ function initAutoKJV(){
 ** the location of the passage on the view. *
 ********************************************/
 function verse_mouseover(event){
+    // If the current target is the open element, then we can just stop
+    if(document.getElementById(OPEN_VERSE) == event.currentTarget){
+        return;
+    }
+    
     // If there is already an open verse, close it.
     if(document.getElementById(OPEN_VERSE) != null){
         document.getElementById(OPEN_VERSE).removeAttribute("id");
     }
     
-    // This element is what the user already can't see.
-    var elem = event.currentTarget.getElementsByClassName('passage')[0];
-    // We need to make it "visible" so its coordinates can be gotten,
-    // but until it is moved, we don't want the user to actually see it.
-    elem.style.visibility = "hidden";
-    
-    // Set the new target to be the open verse
-    // This will also make the element be display:block instead of none.
-    event.currentTarget.setAttribute("id", OPEN_VERSE);
-    
-    // We need to get where things are
-    var txtLoc = event.currentTarget.getBoundingClientRect();   // This is where what the user can see is at
-    var docHeight = document.documentElement.clientHeight;      // This is height of the viewport
-    var verseLoc = elem.getBoundingClientRect();                // This is where what the user can't see is at
-    
-    // If the passage will fall below the viewport, and by putting it above,
-    // we won't make it be somewhat out of view
-    if(docHeight < txtLoc.bottom + verseLoc.height && txtLoc.top - verseLoc.height > 0){
-        // Then place the passage above the reference
-        elem.style.top = (txtLoc.top - verseLoc.height) + "px";
-    }
-    // Otherwise, ensure that the passage will fall below
-    else{
-        elem.style.top = "";
-    }
-    
-    // And now allow the user to see the passage
-    elem.style.visibility = "";
+    // Place the verse where it should go.
+    placeVerse(event.currentTarget);
 }
 
 /********************************************
@@ -73,10 +60,18 @@ function verse_mouseover(event){
 ** the currently open verse.                *
 ********************************************/
 function verse_mouseout(event){
+    if(event.currentTarget.contains(event.relatedTarget) || event.currentTarget == event.relatedTarget){
+        event.stopPropagation();
+        return;
+    }
+    
     // If there is an open verse
     if(document.getElementById(OPEN_VERSE) != null){
-        // Close it, and remove any styles applied to it
+        // Remove any styles that may have been applied
+        document.getElementById(OPEN_VERSE).getElementsByClassName('passage')[0].removeAttribute("style")
         document.getElementById(OPEN_VERSE).removeAttribute("style");
+        
+        // Close the passage
         document.getElementById(OPEN_VERSE).removeAttribute("id");
     }
 }
@@ -133,6 +128,79 @@ function verse_touchend(event){
    }
 }
 
+/****************************************
+** placeVerse function definition       *
+** Places a verse at the best location  *
+** it can find.                         *
+****************************************/
+function placeVerse(target){
+    var MAX_WIDTH = 650;
+    
+    // Save some typing
+    var docElem = document.documentElement;
+    
+    // This element is what the user already can't see.
+    var elem = target.getElementsByClassName('passage')[0];
+    
+    
+    // We need to make it "visible" so its coordinates can be gotten,
+    // but until it is moved, we don't want the user to actually see it.
+    // Unless it's already visible (orientation change), then don't do this
+    if(target != document.getElementById(OPEN_VERSE)){
+        elem.style.visibility = "hidden";
+    }
+    else{
+        elem.removeAttribute('style');
+    }
+    
+    // Set the new target to be the open verse
+    // This will also make the element be display:block instead of none.
+    target.setAttribute("id", OPEN_VERSE);
+    
+    // We need to get where things are
+    var txtLoc = target.getBoundingClientRect(); // This is where what the user can see is at
+    var docHeight = docElem.clientHeight;        // This is height of the viewport
+    var verseLoc = elem.getBoundingClientRect(); // This is where what the user can't see is at
+    
+    // If we can make better use of space by moving this left, then do so.
+    if(verseLoc.right >= docElem.clientWidth - 15 && verseLoc.width < MAX_WIDTH && verseLoc.left > 0){
+        // First, move it as far last as is necessary
+        elem.style.left = verseLoc.left + 10 - Math.min(MAX_WIDTH - verseLoc.width, verseLoc.left) + "px";
+        
+        // We need to re-get verseLoc since the height will have changed.
+        verseLoc = elem.getBoundingClientRect();
+        
+        // Then if it's been moved to far, move it back
+        if(verseLoc.right < docElem.clientWidth - 15){
+            elem.style.left = docElem.clientWidth - 15 - verseLoc.width + "px";
+        }
+        
+        // We don't need to get verseLoc again, as the left is not used below
+    }
+    
+    // If the passage will fall below the viewport
+    if(docHeight < txtLoc.bottom + verseLoc.height){
+        // Then see if putting it above will work
+        if(txtLoc.top - verseLoc.height > 0){
+            // Then place the passage above the reference
+            elem.style.top = (txtLoc.top - verseLoc.height + window.pageYOffset) + "px";
+        }
+        // Otherwise, put it on whichever side is larger, and restrict the height
+        else if(docHeight - txtLoc.bottom > txtLoc.top){
+            // This means the bottom is bigger
+            elem.style.height = (docHeight - txtLoc.bottom - 20) + "px";
+        }
+        else{
+            // The top is bigger
+            elem.style.top = Math.max(10, 10 + window.pageYOffset) + "px";
+            elem.style.height = (target.offsetTop - window.pageYOffset - 20) + "px";
+        }        
+    }
+    
+    // And now allow the user to see the passage
+    elem.style.visibility = "";
+}
+
 /********************************************
 ** body_touchend function definition        *
 ** This method is called whenever a mobile  *
@@ -143,7 +211,36 @@ function body_touchend(event){
     // If there is an open verse, and the target that was hit is not a descendant
     // of the open verse (this works because this event will be called second)
     if(document.getElementById(OPEN_VERSE) != null && !document.getElementById(OPEN_VERSE).contains(event.target)){
-        // Then call mouseout, which will close the currently open passage.
-        verse_mouseout(event);
+        // Then call touchend, which will close the currently open passage if necessary.
+        verse_touchend(event);
     }
+}
+
+/********************************************
+** window_resize function definition        *
+** This method is called whenever the       *
+** screen size is hanged. It repositions    *
+** any open verse.                          *
+********************************************/
+function window_resize(){
+    // If the window x/y size have exactly switched, OR if the 
+    // orientation has changed, AND if there is a verse open
+    if((((window.innerHeight == screenX && window.innerWidth == screenY)) || 
+            window.orientation != screenO) &&
+            document.getElementById(OPEN_VERSE) != null){
+        
+        // Get the open verse
+        var elem = document.getElementById(OPEN_VERSE);
+        
+        // Place it at the bottom of the screen
+        window.scroll(0, elem.offsetTop + elem.clientHeight - document.documentElement.clientHeight);
+        
+        // Replace the verse
+        placeVerse(document.getElementById(OPEN_VERSE));
+    }
+    
+    // Remember the new size, and orientation
+    screenX = window.innerWidth;
+    screenY = window.innerHeight;
+    screenO = window.orientation;
 }
