@@ -42,9 +42,9 @@ The final form for verses can be any combination of range and individual verses,
 
 ## Setup
 
-#. Create a database in MySQL to hold the table that contains the Bible
-#. Modify the php/databaseVars.php to have the correct database information. (Ensure the user has access to the database)
-#. Run the php/setupDB.php file to setup the database
+1. Create a database in MySQL to hold the table that contains the Bible
+2. Modify the php/databaseVars.php to have the correct database information. (Ensure the user has access to the database)
+3. Run the php/setupDB.php file to setup the database
 
 ## File Information
 
