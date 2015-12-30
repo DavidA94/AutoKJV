@@ -2,6 +2,8 @@
 
 A PHP module for allowing web designers to have Scriptures automatically placed into their page, from just a reference string.
 
+[Simple Demo](http://davidantonucci.com/AutoKJV/).
+
 ## License
 
 This project is licensed under the GNU GENERAL PUBLIC LICENSE, Version 2. This means that this project can be used and modified, so long as all parts remain open source.
