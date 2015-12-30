@@ -294,6 +294,9 @@ function getBook($bookName) {
 
     // Remove any periods, in case of something like "Gen." instead of just "Gen"
     $bookName = str_replace('.', '', $bookName);
+    
+    // Remove any double spaces
+    $bookName = str_replace('  ',  ' ', $bookName);
 
     // Start out with a simple search in the array. This will
     // only work if the full name, with proper capitalization
