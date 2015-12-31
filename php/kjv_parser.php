@@ -310,7 +310,8 @@ function getBook($bookName) {
             // If the first character isn't a number, and it doesn't match, then keep going
             // We ignore number ones because those are kept in the alternatives, so they
             // will never match
-            if(!ctype_digit($bookName[0]) && $bookName[0] != $b->getName()[0]){
+            $bookNameTmp = $b->getName();
+            if(!ctype_digit($bookName[0]) && $bookName[0] != $bookNameTmp[0]){
                 continue;
             }
 
