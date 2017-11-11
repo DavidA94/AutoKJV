@@ -17,17 +17,32 @@ require_once('makeHTML.php');
 **      [Book] [Chapter]:[Verse]                    *
 **      [Book] [Chapter]:[Verse]-[Verse], [Verse]   *
 **      [Book] [Chapter]:[Verse]-[Chapter]:[Verse]  *
+** showReferenceCount: Indicates if the number of   *
+**      references found should be included in the  *
+**      HTML.                                       *
+** prefix: Any string that should appear before the *
+**      first reference in the initial display.     *
+**      This can be used to with postfix to wrap    *
+**      the reference(s) with something like        *
+**      parenthesis.                                *
+** postfix: Any string that should appear after the *
+**      last reference in the initial display.      *
+**      This can be used to with prefix to wrap     *
+**      the reference(s) with something like        *
+**      parenthesis.                                *
+** separator: Any string that should appear between *
+**      the references, when there is more than one *
 -- --------------- Returns (string) --------------- -
 ** A string of HTML that has all of the references, *
 ** along with their corresponding text inside of    *
 ** the templates found in the templates folder.     *
 ****************************************************/
-function getBibleHTML($refString){
+function getBibleHTML($refString, $showReferenceCount = true, $prefix = "", $postfix = "", $separator = ""){
     // -- Check if we've already cached this request --
     // Get the filename of where the cached file would be.
     // The filename is the MD5 hash of the request string, so
     // that the filename won't be too long, as it easily can be.
-    $filename = dirname(__FILE__) . "/cached/" . md5($refString) . ".cache";
+    $filename = dirname(__FILE__) . "/cached/" . md5($refString . $prefix . $postfix . $separator) . $showReferenceCount . ".cache";
 
     // If the file exists, just return its contents, and we're done here.
     if(file_exists($filename)){
@@ -189,11 +204,17 @@ function getBibleHTML($refString){
 
     // This is what we will return. First add in
     // The number of references we're giving back
-    $retVal = makePassageCount(count($passages)) . "\n";
+    $numPassages = count($passages);
+    $retVal = ($showReferenceCount ? makePassageCount($numPassages) . "\n" : "");
 
+    // Replace the $prefix holder on the first reference, and the $postfix holder
+    // on the last reference. Then in all others, we will replace with nothingness.
+    $passages[0] = str_replace('$prefix', $prefix, $passages[0]);
+    $passages[$numPassages - 1] = str_replace('$postfix', $postfix, $passages[$numPassages - 1]);
+    
     // Then add each passage separated by a line break
     foreach($passages as $passage){
-        $retVal .= $passage . "\n";
+        $retVal .= str_replace('$prefix', '', str_replace('$postfix', $separator, $passage)) . "\n";
     }
 
     // If the directory where we cache things doesn't exist yet, make it

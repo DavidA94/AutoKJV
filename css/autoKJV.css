@@ -1,9 +1,10 @@
 .verses {overflow:hidden;margin-top:10px;}
 .verses .passageCount {font-weight:bold;}
-.passageWrapper {float:left;}
+
+.passageWrapper {display:inline-block;}
+.passageWrapper .fullRef {display:inline-block;}
 .passageWrapper .badRef {font-size:2em;color:red;}
 .passageWrapper .fullRef span {color:#075aa9;text-decoration:underline;}
-.passageWrapper .fullRef::after {content:"\00a0\2009\2022\2009\00a0";}
 .passageWrapper:last-child .fullRef::after {content:'';}
 .passageWrapper .passage {position:absolute;display:none;background:#ffffde;border:1px solid #75753a;padding:5px;
     margin-right:10px;max-width:650px;min-width:100px;min-height:40px;overflow:auto}
@@ -13,3 +14,7 @@
 .passageWrapper .passage .verse .verseNum {float:left;clear:left;padding-right:5px;}
 .passageWrapper .passage .verse .verseTxt {overflow:hidden;}
 .passageWrapper#openVerse .passage {position:absolute;display:block;z-index:9999;}
+
+.clustered .passageWrapper {display:block;float:left;}
+.clustered .passageWrapper .fullRef {display:black;}
+.clustered .passageWrapper .fullRef::after {content:"\00a0\2009\2022\2009\00a0";}
